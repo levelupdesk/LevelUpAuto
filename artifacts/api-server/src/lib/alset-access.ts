@@ -14,10 +14,11 @@ export function canCreateVehicle(user: AlsetSession): boolean {
 export function canViewVehicle(
   user: AlsetSession,
   vehicle: AlsetVehicle,
+  options: { hasAssignedWorkOrder?: boolean } = {},
 ): boolean {
   return (
     user.role === "admin" ||
-    user.role === "shop" ||
+    (user.role === "shop" && options.hasAssignedWorkOrder === true) ||
     (user.role === "owner" && vehicle.ownerId === user.userId)
   );
 }
@@ -30,8 +31,7 @@ export function canViewClaim(user: AlsetSession, claim: AlsetClaim): boolean {
   return (
     user.role === "admin" ||
     (user.role === "owner" && claim.ownerId === user.userId) ||
-    (user.role === "insurer" &&
-      (claim.insurerId === null || claim.insurerId === user.userId))
+    (user.role === "insurer" && claim.insurerId === user.userId)
   );
 }
 
@@ -41,8 +41,7 @@ export function canUpdateClaim(
 ): boolean {
   return (
     user.role === "admin" ||
-    (user.role === "insurer" &&
-      (claim.insurerId === null || claim.insurerId === user.userId))
+    (user.role === "insurer" && claim.insurerId === user.userId)
   );
 }
 
@@ -96,9 +95,7 @@ export function canUpdateTowingJob(
 ): boolean {
   return (
     user.role === "admin" ||
-    (user.role === "towing" &&
-      (towingJob.assignedCompanyId === null ||
-        towingJob.assignedCompanyId === user.userId))
+    (user.role === "towing" && towingJob.assignedCompanyId === user.userId)
   );
 }
 
@@ -125,8 +122,6 @@ export function canUpdateRental(
 ): boolean {
   return (
     user.role === "admin" ||
-    (user.role === "rental" &&
-      (rental.rentalCompanyId === null ||
-        rental.rentalCompanyId === user.userId))
+    (user.role === "rental" && rental.rentalCompanyId === user.userId)
   );
 }

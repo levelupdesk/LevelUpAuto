@@ -41,9 +41,10 @@ async function towRow(t: typeof alsetTowingTable.$inferSelect) {
 }
 
 router.get("/alset/towing", async (req, res) => {
-  const user = getRequestUser(req);
-  if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
   try {
+    const user = await getRequestUser(req);
+    if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
+
     const jobs = await db.select().from(alsetTowingTable);
     const accessibleJobs = jobs.filter(job => canViewTowingJob(user, job));
     res.json(await Promise.all(accessibleJobs.map(towRow)));
@@ -54,12 +55,13 @@ router.get("/alset/towing", async (req, res) => {
 });
 
 router.post("/alset/towing", async (req, res) => {
-  const user = getRequestUser(req);
-  if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
-  if (!canCreateTowingJob(user)) { res.status(403).json({ error: "Forbidden" }); return; }
-  const parsed = CreateTowingJobBody.safeParse(req.body);
-  if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
   try {
+    const user = await getRequestUser(req);
+    if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
+    if (!canCreateTowingJob(user)) { res.status(403).json({ error: "Forbidden" }); return; }
+    const parsed = CreateTowingJobBody.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
+
     const [vehicle] = await db
       .select()
       .from(alsetVehiclesTable)
@@ -86,24 +88,36 @@ router.post("/alset/towing", async (req, res) => {
 });
 
 router.patch("/alset/towing/:id", async (req, res) => {
-  const user = getRequestUser(req);
-  if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
-  const parsed = UpdateTowingJobBody.safeParse(req.body);
-  if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
   try {
+    const user = await getRequestUser(req);
+    if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
+    const parsed = UpdateTowingJobBody.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
+
     const [currentJob] = await db
       .select()
       .from(alsetTowingTable)
       .where(eq(alsetTowingTable.id, Number(req.params.id)))
       .limit(1);
     if (!currentJob) { res.status(404).json({ error: "Towing job not found" }); return; }
-    if (!canUpdateTowingJob(user, currentJob)) { res.status(404).json({ error: "Towing job not found" }); return; }
+    const isUnassignedSelfClaim =
+      user.role === "towing" &&
+      currentJob.assignedCompanyId === null &&
+      (parsed.data.assignedCompanyId === undefined ||
+        parsed.data.assignedCompanyId === user.userId) &&
+      parsed.data.driverName === undefined &&
+      parsed.data.estimatedArrival === undefined &&
+      parsed.data.status === undefined;
+    if (!isUnassignedSelfClaim && !canUpdateTowingJob(user, currentJob)) {
+      res.status(404).json({ error: "Towing job not found" });
+      return;
+    }
 
     const updates: any = {};
     if (parsed.data.status) updates.status = parsed.data.status;
     if (user.role === "towing" && currentJob.assignedCompanyId === null) {
       updates.assignedCompanyId = user.userId;
-    } else if (parsed.data.assignedCompanyId !== undefined) {
+    } else if (user.role === "admin" && parsed.data.assignedCompanyId !== undefined) {
       updates.assignedCompanyId = parsed.data.assignedCompanyId;
     }
     if (parsed.data.driverName !== undefined) updates.driverName = parsed.data.driverName;

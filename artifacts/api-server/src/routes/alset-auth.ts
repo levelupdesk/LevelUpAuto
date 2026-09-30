@@ -14,6 +14,7 @@ import {
 const router: IRouter = Router();
 const LOGIN_RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const MAX_LOGIN_ATTEMPTS = 5;
+const MAX_LOGIN_TRACKED_KEYS = 10_000;
 const loginAttempts = new Map<string, { count: number; resetAt: number }>();
 
 function getLoginAttemptKey(ip: string | undefined, email: string): string {
@@ -21,6 +22,7 @@ function getLoginAttemptKey(ip: string | undefined, email: string): string {
 }
 
 function isLoginRateLimited(key: string, now = Date.now()): boolean {
+  pruneLoginAttempts(now);
   const entry = loginAttempts.get(key);
 
   if (!entry) {
@@ -36,6 +38,7 @@ function isLoginRateLimited(key: string, now = Date.now()): boolean {
 }
 
 function recordFailedLoginAttempt(key: string, now = Date.now()) {
+  pruneLoginAttempts(now);
   const entry = loginAttempts.get(key);
 
   if (!entry || entry.resetAt <= now) {
@@ -50,6 +53,24 @@ function recordFailedLoginAttempt(key: string, now = Date.now()) {
     count: entry.count + 1,
     resetAt: entry.resetAt,
   });
+}
+
+function pruneLoginAttempts(now = Date.now()) {
+  for (const [key, entry] of loginAttempts.entries()) {
+    if (entry.resetAt <= now) {
+      loginAttempts.delete(key);
+    }
+  }
+
+  while (loginAttempts.size > MAX_LOGIN_TRACKED_KEYS) {
+    const oldestKey = loginAttempts.keys().next().value;
+
+    if (!oldestKey) {
+      return;
+    }
+
+    loginAttempts.delete(oldestKey);
+  }
 }
 
 function clearLoginAttempts(key: string) {
@@ -122,14 +143,14 @@ router.post("/alset/auth/login", async (req, res) => {
 });
 
 router.get("/alset/auth/me", async (req, res) => {
-  const decoded = getRequestUser(req);
-
-  if (!decoded) {
-    res.status(401).json({ error: "Unauthorized" });
-    return;
-  }
-
   try {
+    const decoded = await getRequestUser(req);
+
+    if (!decoded) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
     const [user] = await db
       .select()
       .from(alsetUsersTable)

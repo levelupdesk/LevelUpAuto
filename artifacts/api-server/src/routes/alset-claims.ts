@@ -47,9 +47,10 @@ async function claimRow(c: typeof alsetClaimsTable.$inferSelect) {
 }
 
 router.get("/alset/claims", async (req, res) => {
-  const user = getRequestUser(req);
-  if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
   try {
+    const user = await getRequestUser(req);
+    if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
+
     const claims = await db.select().from(alsetClaimsTable);
     const accessibleClaims = claims.filter(claim => canViewClaim(user, claim));
     const rows = await Promise.all(accessibleClaims.map(claimRow));
@@ -61,12 +62,13 @@ router.get("/alset/claims", async (req, res) => {
 });
 
 router.post("/alset/claims", async (req, res) => {
-  const user = getRequestUser(req);
-  if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
-  if (!canCreateClaim(user)) { res.status(403).json({ error: "Forbidden" }); return; }
-  const parsed = CreateClaimBody.safeParse(req.body);
-  if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
   try {
+    const user = await getRequestUser(req);
+    if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
+    if (!canCreateClaim(user)) { res.status(403).json({ error: "Forbidden" }); return; }
+    const parsed = CreateClaimBody.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
+
     const [vehicle] = await db
       .select()
       .from(alsetVehiclesTable)
@@ -95,9 +97,10 @@ router.post("/alset/claims", async (req, res) => {
 });
 
 router.get("/alset/claims/:id", async (req, res) => {
-  const user = getRequestUser(req);
-  if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
   try {
+    const user = await getRequestUser(req);
+    if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
+
     const [c] = await db.select().from(alsetClaimsTable).where(eq(alsetClaimsTable.id, Number(req.params.id))).limit(1);
     if (!c) { res.status(404).json({ error: "Claim not found" }); return; }
     if (!canViewClaim(user, c)) { res.status(404).json({ error: "Claim not found" }); return; }
@@ -109,11 +112,12 @@ router.get("/alset/claims/:id", async (req, res) => {
 });
 
 router.patch("/alset/claims/:id", async (req, res) => {
-  const user = getRequestUser(req);
-  if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
-  const parsed = UpdateClaimBody.safeParse(req.body);
-  if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
   try {
+    const user = await getRequestUser(req);
+    if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
+    const parsed = UpdateClaimBody.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
+
     const [currentClaim] = await db
       .select()
       .from(alsetClaimsTable)

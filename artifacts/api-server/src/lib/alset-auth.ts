@@ -1,4 +1,7 @@
 import crypto from "crypto";
+import { db } from "@workspace/db";
+import { alsetUsersTable } from "@workspace/db/schema";
+import { eq } from "drizzle-orm";
 
 export type AlsetRole =
   | "owner"
@@ -13,9 +16,7 @@ export interface AlsetSession {
   role: AlsetRole;
 }
 
-const LEGACY_DEMO_PASSWORD = "demo123";
-const LEGACY_DEMO_PASSWORD_HASH =
-  "178dc0437010df070293ea9bd2ef50922d85fe94cc7466fac40fc7545dcae1ee";
+const LEGACY_PASSWORD_SALT = "alset-salt";
 const PASSWORD_HASH_PREFIX = "scrypt";
 const PASSWORD_KEY_LENGTH = 64;
 const TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -25,12 +26,10 @@ function base64UrlEncode(value: string | Buffer): string {
 }
 
 function getTokenSecret(): string {
-  const secret = process.env.ALSET_AUTH_SECRET ?? process.env.DATABASE_URL;
+  const secret = process.env.ALSET_AUTH_SECRET;
 
   if (!secret) {
-    throw new Error(
-      "ALSET_AUTH_SECRET or DATABASE_URL must be set to sign Alset auth tokens.",
-    );
+    throw new Error("ALSET_AUTH_SECRET must be set to sign Alset auth tokens.");
   }
 
   return secret;
@@ -77,10 +76,12 @@ export function verifyPassword(password: string, storedHash: string): boolean {
     return timingSafeEqualText(expectedHash, derivedKey);
   }
 
-  return (
-    timingSafeEqualText(storedHash, LEGACY_DEMO_PASSWORD_HASH) &&
-    timingSafeEqualText(password, LEGACY_DEMO_PASSWORD)
-  );
+  const legacyHash = crypto
+    .createHash("sha256")
+    .update(`${password}${LEGACY_PASSWORD_SALT}`)
+    .digest("hex");
+
+  return timingSafeEqualText(storedHash, legacyHash);
 }
 
 export function passwordNeedsRehash(storedHash: string): boolean {
@@ -147,7 +148,7 @@ export function verifyToken(token: string): AlsetSession | null {
   }
 }
 
-export function getRequestUser(req: {
+function getTokenSession(req: {
   headers: { authorization?: string | string[] };
 }): AlsetSession | null {
   const authHeader = req.headers.authorization;
@@ -161,4 +162,33 @@ export function getRequestUser(req: {
   }
 
   return verifyToken(bearerToken);
+}
+
+export async function getRequestUser(req: {
+  headers: { authorization?: string | string[] };
+}): Promise<AlsetSession | null> {
+  const session = getTokenSession(req);
+
+  if (!session) {
+    return null;
+  }
+
+  const [user] = await db
+    .select({ id: alsetUsersTable.id, role: alsetUsersTable.role })
+    .from(alsetUsersTable)
+    .where(eq(alsetUsersTable.id, session.userId))
+    .limit(1);
+
+  if (!user) {
+    return null;
+  }
+
+  if (user.role !== session.role) {
+    return null;
+  }
+
+  return {
+    userId: user.id,
+    role: user.role,
+  };
 }

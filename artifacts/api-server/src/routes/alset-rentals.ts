@@ -39,9 +39,10 @@ async function rentalRow(r: typeof alsetRentalsTable.$inferSelect) {
 }
 
 router.get("/alset/rentals", async (req, res) => {
-  const user = getRequestUser(req);
-  if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
   try {
+    const user = await getRequestUser(req);
+    if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
+
     const rentals = await db.select().from(alsetRentalsTable);
     const accessibleRentals = rentals.filter(rental => canViewRental(user, rental));
     res.json(await Promise.all(accessibleRentals.map(rentalRow)));
@@ -52,12 +53,13 @@ router.get("/alset/rentals", async (req, res) => {
 });
 
 router.post("/alset/rentals", async (req, res) => {
-  const user = getRequestUser(req);
-  if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
-  if (!canCreateRental(user)) { res.status(403).json({ error: "Forbidden" }); return; }
-  const parsed = CreateRentalBody.safeParse(req.body);
-  if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
   try {
+    const user = await getRequestUser(req);
+    if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
+    if (!canCreateRental(user)) { res.status(403).json({ error: "Forbidden" }); return; }
+    const parsed = CreateRentalBody.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
+
     const [r] = await db.insert(alsetRentalsTable).values({
       bookingNumber: genBookingNumber(),
       claimId: parsed.data.claimId ?? null,
@@ -74,26 +76,34 @@ router.post("/alset/rentals", async (req, res) => {
 });
 
 router.patch("/alset/rentals/:id", async (req, res) => {
-  const user = getRequestUser(req);
-  if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
-  const parsed = UpdateRentalBody.safeParse(req.body);
-  if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
   try {
+    const user = await getRequestUser(req);
+    if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
+    const parsed = UpdateRentalBody.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
+
     const [currentRental] = await db
       .select()
       .from(alsetRentalsTable)
       .where(eq(alsetRentalsTable.id, Number(req.params.id)))
       .limit(1);
     if (!currentRental) { res.status(404).json({ error: "Rental not found" }); return; }
-    if (!canUpdateRental(user, currentRental)) { res.status(404).json({ error: "Rental not found" }); return; }
+    const isUnassignedSelfClaim =
+      user.role === "rental" &&
+      currentRental.rentalCompanyId === null &&
+      parsed.data.status === undefined &&
+      parsed.data.endDate === undefined &&
+      parsed.data.dailyRate === undefined;
+    if (!isUnassignedSelfClaim && !canUpdateRental(user, currentRental)) {
+      res.status(404).json({ error: "Rental not found" });
+      return;
+    }
 
     const updates: any = {};
     if (parsed.data.status) updates.status = parsed.data.status;
     if (parsed.data.endDate !== undefined) updates.endDate = parsed.data.endDate;
     if (parsed.data.dailyRate !== undefined) updates.dailyRate = parsed.data.dailyRate?.toString() ?? null;
-    if (user.role === "rental" && currentRental.rentalCompanyId === null) {
-      updates.rentalCompanyId = user.userId;
-    }
+    if (isUnassignedSelfClaim) updates.rentalCompanyId = user.userId;
     const [r] = await db.update(alsetRentalsTable).set(updates).where(eq(alsetRentalsTable.id, Number(req.params.id))).returning();
     if (!r) { res.status(404).json({ error: "Rental not found" }); return; }
     res.json(await rentalRow(r));
