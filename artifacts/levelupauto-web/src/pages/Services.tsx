@@ -14,7 +14,7 @@ const categoryIcons: Record<string, React.ReactNode> = {
 };
 
 export default function Services() {
-  const { data: services, isLoading } = useListServices();
+  const { data: services, isLoading, isError } = useListServices();
   const [filter, setFilter] = useState<string | null>(null);
 
   const categories = Array.from(new Set(services?.map(s => s.category) || []));
@@ -62,7 +62,9 @@ export default function Services() {
           ))}
         </div>
 
-        {isLoading ? (
+        {isError ? (
+          <div className="text-center py-16 text-muted-foreground">Our service menu is temporarily unavailable. Please call or contact us for pricing and availability.</div>
+        ) : isLoading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3, 4, 5, 6].map(i => (
               <div key={i} className="h-64 bg-card/50 rounded-2xl animate-pulse border border-border" />
