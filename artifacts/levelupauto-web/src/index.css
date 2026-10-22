@@ -97,7 +97,7 @@
   }
   
   .bg-carbon {
-    background-image: url('/images/carbon-fiber-bg.png');
+    /* carbon-fiber-bg.png was missing from public/images; removed broken reference */
     background-repeat: repeat;
     background-size: 200px;
   }

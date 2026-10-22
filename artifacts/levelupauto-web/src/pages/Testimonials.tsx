@@ -3,7 +3,7 @@ import { Star, Quote } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Testimonials() {
-  const { data: testimonials, isLoading } = useListTestimonials();
+  const { data: testimonials, isLoading, isError } = useListTestimonials();
 
   return (
     <div className="min-h-screen pt-24 pb-20 bg-background">
@@ -22,7 +22,9 @@ export default function Testimonials() {
           </p>
         </div>
 
-        {isLoading ? (
+        {isError ? (
+          <div className="text-center py-16 text-muted-foreground">Reviews are temporarily unavailable. Please check back soon.</div>
+        ) : isLoading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
              {[1, 2, 3, 4, 5, 6].map(i => (
               <div key={i} className="h-64 bg-card rounded-2xl animate-pulse border border-border" />

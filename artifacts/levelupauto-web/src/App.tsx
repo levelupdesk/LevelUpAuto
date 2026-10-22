@@ -12,7 +12,7 @@ import BookAppointment from "@/pages/BookAppointment";
 import Testimonials from "@/pages/Testimonials";
 import Contact from "@/pages/Contact";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1 } } });
 
 function Router() {
   return (
