@@ -34,6 +34,11 @@ yarn-error.*
 # local env files
 .env*.local
 
+# Signing and store credentials. Never commit these.
+asc-api-key.p8
+AuthKey_*.p8
+google-play-service-account.json
+
 # typescript
 *.tsbuildinfo
 .vercel

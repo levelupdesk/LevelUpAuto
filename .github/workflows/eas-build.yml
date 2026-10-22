@@ -4,34 +4,82 @@ on:
   push:
     branches: [main]
     paths:
-      - 'artifacts/levelupauto-mobile/**'
+      - "artifacts/levelupauto-mobile/**"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/eas-build.yml"
   workflow_dispatch:
     inputs:
       profile:
-        description: 'EAS build profile'
+        description: "EAS build profile"
         required: true
-        default: 'preview'
+        default: "preview"
         type: choice
         options:
           - development
           - preview
           - production
 
+concurrency:
+  group: eas-mobile-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  build:
-    name: EAS Build (${{ github.event.inputs.profile || 'preview' }})
+  check:
+    name: Lint and typecheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-
-      - uses: pnpm/action-setup@v4
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm --filter @workspace/levelupauto-mobile run lint
+
+      - name: Typecheck
+        run: pnpm --filter @workspace/levelupauto-mobile run typecheck
+
+  build:
+    name: EAS Build
+    runs-on: ubuntu-latest
+    needs: check
+    env:
+      EAS_PROJECT_ID: ${{ secrets.EAS_PROJECT_ID }}
+      EXPO_APPLE_TEAM_ID: ${{ secrets.EXPO_APPLE_TEAM_ID }}
+      EXPO_ASC_KEY_ID: ${{ secrets.EXPO_ASC_KEY_ID }}
+      EXPO_ASC_ISSUER_ID: ${{ secrets.EXPO_ASC_ISSUER_ID }}
+      EXPO_ASC_API_KEY_PATH: ${{ github.workspace }}/artifacts/levelupauto-mobile/asc-api-key.p8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Materialize App Store Connect API key
+        working-directory: artifacts/levelupauto-mobile
+        env:
+          EXPO_ASC_API_KEY: ${{ secrets.EXPO_ASC_API_KEY }}
+        run: |
+          if [ -z "$EXPO_ASC_API_KEY" ]; then
+            echo "EXPO_ASC_API_KEY is unset. EAS will use credentials already stored on Expo."
+            exit 0
+          fi
+          umask 077
+          printf '%s\n' "$EXPO_ASC_API_KEY" > asc-api-key.p8
 
       - name: Setup EAS
         uses: expo/expo-github-action@v8
@@ -41,25 +89,53 @@ jobs:
 
       - name: Build on EAS
         working-directory: artifacts/levelupauto-mobile
+        env:
+          PROFILE: ${{ github.event.inputs.profile || 'production' }}
         run: |
           eas build \
             --platform all \
-            --profile ${{ github.event.inputs.profile || 'preview' }} \
+            --profile "$PROFILE" \
             --non-interactive
 
-  submit-production:
-    name: Submit to Stores
+  testflight:
+    name: Upload to TestFlight
     runs-on: ubuntu-latest
     needs: build
-    if: github.event.inputs.profile == 'production'
+    # Production builds are uploaded to TestFlight only.
+    # eas submit delivers the binary to App Store Connect. It does not
+    # submit the version for App Review. Play Store upload is not run here.
+    if: github.event_name == 'push' || github.event.inputs.profile == 'production'
+    env:
+      EAS_PROJECT_ID: ${{ secrets.EAS_PROJECT_ID }}
+      EXPO_APPLE_TEAM_ID: ${{ secrets.EXPO_APPLE_TEAM_ID }}
+      EXPO_ASC_APP_ID: ${{ secrets.EXPO_ASC_APP_ID }}
+      EXPO_ASC_KEY_ID: ${{ secrets.EXPO_ASC_KEY_ID }}
+      EXPO_ASC_ISSUER_ID: ${{ secrets.EXPO_ASC_ISSUER_ID }}
+      EXPO_ASC_API_KEY_PATH: asc-api-key.p8
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: pnpm
 
-      - uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Materialize App Store Connect API key
+        working-directory: artifacts/levelupauto-mobile
+        env:
+          EXPO_ASC_API_KEY: ${{ secrets.EXPO_ASC_API_KEY }}
+        run: |
+          if [ -z "$EXPO_ASC_API_KEY" ]; then
+            echo "EXPO_ASC_API_KEY is required to upload to TestFlight."
+            exit 1
+          fi
+          umask 077
+          printf '%s\n' "$EXPO_ASC_API_KEY" > asc-api-key.p8
 
       - name: Setup EAS
         uses: expo/expo-github-action@v8
@@ -67,12 +143,10 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Submit iOS to App Store
+      - name: Apply submit profile from secrets
         working-directory: artifacts/levelupauto-mobile
-        run: eas submit --platform ios --non-interactive
-        env:
-          EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        run: node scripts/apply-apple-submit-env.js
 
-      - name: Submit Android to Google Play
+      - name: Upload iOS build to TestFlight
         working-directory: artifacts/levelupauto-mobile
-        run: eas submit --platform android --non-interactive
+        run: eas submit --platform ios --profile production --latest --non-interactive

@@ -24,6 +24,20 @@ jobs:
       - run: cd artifacts/api-server && npx tsc --noEmit
       - run: cd artifacts/alset-web && npx tsc --noEmit
 
+  mobile:
+    name: Mobile lint and typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @workspace/levelupauto-mobile run lint
+      - run: pnpm --filter @workspace/levelupauto-mobile run typecheck
+
   build-web:
     name: Build Web Apps
     runs-on: ubuntu-latest

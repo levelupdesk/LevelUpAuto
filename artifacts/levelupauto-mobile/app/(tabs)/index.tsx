@@ -3,8 +3,10 @@ import { StyleSheet, Text, View } from "react-native";
 export default function TabOneScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Replit Agent is building...</Text>
-      <Text style={styles.text}>Your app will appear here once it's ready.</Text>
+      <Text style={styles.title}>LevelUpAuto</Text>
+      <Text style={styles.text}>
+        Apple companion for your vehicle. iPhone, iPad, Watch, and widgets share this app.
+      </Text>
     </View>
   );
 }

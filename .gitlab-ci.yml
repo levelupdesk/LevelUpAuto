@@ -122,11 +122,13 @@ mobile:build-production:
     - npm install -g eas-cli
     - cd artifacts/levelupauto-mobile
     - eas build --platform all --profile production --non-interactive
-    - eas submit --platform ios --non-interactive
-    - eas submit --platform android --non-interactive
   variables:
     EXPO_TOKEN: $EXPO_TOKEN
-    EXPO_APPLE_APP_SPECIFIC_PASSWORD: $APPLE_APP_SPECIFIC_PASSWORD
+    EAS_PROJECT_ID: $EAS_PROJECT_ID
+    EXPO_APPLE_TEAM_ID: $EXPO_APPLE_TEAM_ID
   only:
     - main
   when: manual
+  # TestFlight upload and App Store release are not done here.
+  # GitHub Actions uploads production iOS builds to TestFlight only.
+  # Submitting for App Review stays manual.
