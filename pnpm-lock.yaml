@@ -476,8 +476,8 @@ importers:
         specifier: workspace:*
         version: link:../../lib/api-client-react
       babel-plugin-react-compiler:
-        specifier: ^19.0.0-beta-e993439-20250117
-        version: 19.0.0-beta-ebf51a3-20250411
+        specifier: ^19.0.0-beta-714736e-20250131
+        version: 19.0.0-beta-714736e-20250131
       expo:
         specifier: ~54.0.37
         version: 54.0.37(@babel/core@7.29.7)(@expo/metro-runtime@6.1.2)(expo-router@6.0.24)(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.3.0)(react@19.3.0))(react@19.3.0)(typescript@5.9.3)
@@ -1102,16 +1102,8 @@ packages:
     resolution: {integrity: sha512-brcMGQaVzIeUb+6/bs1Av0f8YuNNjKY2JyvfRCsFuFsdKccEQ5Ges2y74D74NZ1Rz8lKJ9ksJkfqwQFJ/iNEyQ==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/helper-string-parser@7.27.1':
-    resolution: {integrity: sha512-qMlSxKbpRlAridDExk92nSobyDdpPijUq2DW6oDnUqd0iOGxmQjyqhMIihI9+zv4LPyZdRje2cavWPbCbWm3eA==}
-    engines: {node: '>=6.9.0'}
-
   '@babel/helper-string-parser@7.29.7':
     resolution: {integrity: sha512-Pb5ijPrZ89GDH8223L4UP8i6QApWxs04RbPQJTeWDV0/keR2E36MeKnyr6LYmUUvqRRI+Iv87SuF1W6ErINzYw==}
-    engines: {node: '>=6.9.0'}
-
-  '@babel/helper-validator-identifier@7.28.5':
-    resolution: {integrity: sha512-qSs4ifwzKJSV39ucNjsvc6WVHs6b7S03sOh2OcHF9UHfVPqWWALUsNUVzhSBiItjRZoLHx7nIarVjqKVusUZ1Q==}
     engines: {node: '>=6.9.0'}
 
   '@babel/helper-validator-identifier@7.29.7':
@@ -1452,10 +1444,6 @@ packages:
 
   '@babel/traverse@7.29.10':
     resolution: {integrity: sha512-B3lYAs2nkKskbgQ1nfy8Ma9ao9Q1rntTAQHrzzyDuj+TSO+X3le6PfWwqDvodsb+OumE10eMFfuMCTQSQ5iuIQ==}
-    engines: {node: '>=6.9.0'}
-
-  '@babel/types@7.29.0':
-    resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
 
   '@babel/types@7.29.8':
@@ -3070,8 +3058,8 @@ packages:
   babel-plugin-react-compiler@1.0.0:
     resolution: {integrity: sha512-Ixm8tFfoKKIPYdCCKYTsqv+Fd4IJ0DQqMyEimo+pxUOMUR9cVPlwTrFt9Avu+3cb6Zp3mAzl+t1MrG2fxxKsxw==}
 
-  babel-plugin-react-compiler@19.0.0-beta-ebf51a3-20250411:
-    resolution: {integrity: sha512-q84bNR9JG1crykAlJUt5Ud0/5BUyMFuQww/mrwIQDFBaxsikqBDj3f/FNDsVd2iR26A1HvXKWPEIfgJDv8/V2g==}
+  babel-plugin-react-compiler@19.0.0-beta-714736e-20250131:
+    resolution: {integrity: sha512-frj2l6fRWVi26iw9WthFKyFyE4u5ZSHH3KdKiscOOwpz210seTtwnp0QbJmi8Zoa5HK7Fk2fH40JffN2y8GvLg==}
 
   babel-plugin-react-native-web@0.21.4:
     resolution: {integrity: sha512-FSclsDTGi5EcvpbW3TM7s8GLWwQqo5wI9zQqJr2m0IoJRenSkp1+bVvdeZXTNznI5Ms9Bry7DLBR+C5Shb9gtw==}
@@ -6133,11 +6121,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@babel/helper-string-parser@7.27.1': {}
-
   '@babel/helper-string-parser@7.29.7': {}
-
-  '@babel/helper-validator-identifier@7.28.5': {}
 
   '@babel/helper-validator-identifier@7.29.7': {}
 
@@ -6537,11 +6521,6 @@ snapshots:
       debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
-
-  '@babel/types@7.29.0':
-    dependencies:
-      '@babel/helper-string-parser': 7.27.1
-      '@babel/helper-validator-identifier': 7.28.5
 
   '@babel/types@7.29.8':
     dependencies:
@@ -8454,9 +8433,9 @@ snapshots:
     dependencies:
       '@babel/types': 7.29.8
 
-  babel-plugin-react-compiler@19.0.0-beta-ebf51a3-20250411:
+  babel-plugin-react-compiler@19.0.0-beta-714736e-20250131:
     dependencies:
-      '@babel/types': 7.29.0
+      '@babel/types': 7.29.8
 
   babel-plugin-react-native-web@0.21.4: {}
 
