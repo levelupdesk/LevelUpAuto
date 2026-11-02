@@ -20,10 +20,7 @@ diff --git a/src/Assets.js.flow b/src/Assets.js.flow
 index 3abcf7e96c2f2d376009dcd0ab61a77c70a1d880..8bb3c93271342e99b31fa5cbc1118feabb918ccd 100644
 --- a/src/Assets.js.flow
 +++ b/src/Assets.js.flow
-@@ -217,10 +217,9 @@ export async function getAssetData(
-   const isImage = isAssetTypeAnImage(path.extname(assetPath).slice(1));
-   const assetInfo = await getAbsoluteAssetInfo(assetPath, platform);
- 
+@@ -220,5 +220,4 @@ export async function getAssetData(
 -  const isImageInput = assetInfo.files[0].includes('.zip/')
 -    ? fs.readFileSync(assetInfo.files[0])
 -    : assetInfo.files[0];
@@ -32,5 +29,3 @@ index 3abcf7e96c2f2d376009dcd0ab61a77c70a1d880..8bb3c93271342e99b31fa5cbc1118fea
 +    ? getImageSize(fs.readFileSync(assetInfo.files[0]))
 +    : null;
    const scale = assetInfo.scales[0];
- 
-   const assetData = {
