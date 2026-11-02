@@ -63,6 +63,7 @@ overrides:
   '@tailwindcss/oxide>@tailwindcss/oxide-win32-arm64-msvc': '-'
   '@tailwindcss/oxide>@tailwindcss/oxide-win32-x64-msvc': '-'
   esbuild: 0.28.1
+  image-size: 2.0.3
   '@babel/core@>=7.0.0 <7.29.6': ^7.29.6
   '@xmldom/xmldom@>=0.8.0 <0.8.15': ^0.8.15
   'body-parser@>=2.0.0 <2.3.0': ^2.3.0
@@ -147,3 +148,6 @@ overrides:
   rollup>@rollup/rollup-win32-ia32-msvc: '-'
   rollup>@rollup/rollup-win32-x64-gnu: '-'
   rollup>@rollup/rollup-win32-x64-msvc: '-'
+
+patchedDependencies:
+  metro@0.83.3: patches/metro@0.83.3.patch
