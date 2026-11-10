@@ -110,7 +110,7 @@ overrides:
   js-yaml@>=4.0.0 <4.3.2: ^4.3.2
   linkify-it@>=5.0.0 <5.0.2: ^5.0.2
   lodash@>=4.0.0 <4.18.0: ^4.18.0
-  glob@>=13.0.0 <14.0.0: 14.0.0
+  glob@>=13.0.0 <14.0.0: 14.0.2
   minimatch@>=9.0.0 <11.0.1: 11.0.1
   nanoid@>=3.0.0 <3.3.18: ^3.3.18
   path-to-regexp@>=8.0.0 <8.4.0: ^8.4.0
@@ -4180,8 +4180,8 @@ packages:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
     engines: {node: '>= 6'}
 
-  glob@14.0.0:
-    resolution: {integrity: sha512-13Y78zdf6sGBFq7IXYL0hyEv1cOwfPGTuU0/9XYPPVTxw1SEXKC/7+oD9uJNVb4jgxdZR1U3BgB95hT5ZDRnvQ==}
+  glob@14.0.2:
+    resolution: {integrity: sha512-vfMgTR2djMHPUchsJMLpZlYQvtjVL+mHpEr5wPpoCbQs2vr/FBNK+3Gnl9Ara1DSs4Aeg4eG9HiADb5/rkY/ZA==}
     engines: {node: 18 || 20 || >=22}
 
   glob@7.2.3:
@@ -6724,7 +6724,7 @@ snapshots:
       expo-server: 1.0.7
       freeport-async: 2.0.0
       getenv: 2.0.0
-      glob: 14.0.0
+      glob: 14.0.2
       lan-network: 0.2.1
       minimatch: 11.0.1
       node-forge: 1.4.2
@@ -6775,7 +6775,7 @@ snapshots:
       chalk: 4.1.2
       debug: 4.4.3
       getenv: 2.0.0
-      glob: 14.0.0
+      glob: 14.0.2
       resolve-from: 5.0.0
       semver: 7.8.5
       slash: 3.0.0
@@ -6795,7 +6795,7 @@ snapshots:
       '@expo/json-file': 10.2.0
       deepmerge: 4.3.1
       getenv: 2.0.0
-      glob: 14.0.0
+      glob: 14.0.2
       require-from-string: 2.0.2
       resolve-from: 5.0.0
       resolve-workspace-root: 2.0.1
@@ -6836,7 +6836,7 @@ snapshots:
       chalk: 4.1.2
       debug: 4.4.3
       getenv: 2.0.0
-      glob: 14.0.0
+      glob: 14.0.2
       ignore: 5.3.2
       minimatch: 11.0.1
       p-limit: 3.1.0
@@ -6889,7 +6889,7 @@ snapshots:
       dotenv: 16.4.7
       dotenv-expand: 11.0.7
       getenv: 2.0.0
-      glob: 14.0.0
+      glob: 14.0.2
       hermes-parser: 0.29.1
       jsc-safe-url: 0.2.4
       lightningcss: 1.33.0
@@ -9619,7 +9619,7 @@ snapshots:
     dependencies:
       is-glob: 4.0.3
 
-  glob@14.0.0:
+  glob@14.0.2:
     dependencies:
       minimatch: 11.0.1
       minipass: 7.1.3
