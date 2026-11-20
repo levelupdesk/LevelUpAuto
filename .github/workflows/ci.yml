@@ -1,5 +1,9 @@
 name: CI
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 on:
   push:
     branches: [main, develop]
@@ -8,6 +12,7 @@ on:
 
 jobs:
   typecheck:
+    timeout-minutes: 20
     name: TypeScript
     runs-on: ubuntu-latest
     steps:
@@ -15,7 +20,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: cd lib/db && npx tsc -p tsconfig.json
@@ -25,6 +30,7 @@ jobs:
       - run: cd artifacts/alset-web && npx tsc --noEmit
 
   build-web:
+    timeout-minutes: 20
     name: Build Web Apps
     runs-on: ubuntu-latest
     needs: typecheck
@@ -33,13 +39,14 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @workspace/levelupauto-web run build
       - run: pnpm --filter @workspace/alset-web run build
 
   security-audit:
+    timeout-minutes: 20
     name: Security Audit
     runs-on: ubuntu-latest
     steps:
@@ -47,7 +54,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=critical
