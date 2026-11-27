@@ -2,10 +2,11 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { contactsTable } from "@workspace/db/schema";
 import { SubmitContactFormBody } from "@workspace/api-zod";
+import { contactRateLimit } from "../lib/rate-limit";
 
 const router: IRouter = Router();
 
-router.post("/contact", async (req, res) => {
+router.post("/contact", contactRateLimit, async (req, res) => {
   const parsed = SubmitContactFormBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });

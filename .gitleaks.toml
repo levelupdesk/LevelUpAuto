@@ -1,0 +1,11 @@
+title = "LevelUpAuto gitleaks config"
+
+[extend]
+useDefault = true
+
+# Default rules still run. This skips one historical commit whose only finding
+# is a legacy demo password hash that the commit itself deleted. The value is
+# not in the current tree. Do not add commits here for secrets that are still present.
+[[allowlists]]
+description = "Removed legacy demo password hash"
+commits = ["cc568b51e6afdea79f034d0131d5b3daa7b6f423"]

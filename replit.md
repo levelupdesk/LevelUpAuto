@@ -47,7 +47,7 @@ Multi-sided platform for Tesla vehicle owners. CIECA/BMS-inspired insurance inte
 
 **Roles**: owner, shop, insurer, towing, rental, admin
 
-**Demo accounts** (all password: `demo123`):
+**Demo accounts** (shared password from `SEED_DEMO_PASSWORD`; it is not stored in the repo):
 - `owner@alset.com` — Tesla Owner portal
 - `shop@alset.com` — Repair Shop portal
 - `insurer@alset.com` — Insurance Adjuster portal
@@ -76,7 +76,7 @@ Multi-sided platform for Tesla vehicle owners. CIECA/BMS-inspired insurance inte
 - `GET/POST /rentals`, `PATCH /rentals/:id`
 - `GET /dashboard/stats`
 
-**Seed**: `pnpm --filter @workspace/scripts run seed-alset`
+**Seed**: `SEED_DEMO_PASSWORD=... pnpm --filter @workspace/scripts run seed-alset`
 
 ## Database Schema
 

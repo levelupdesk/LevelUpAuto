@@ -30,7 +30,7 @@ export default function Login() {
   };
 
   const fillDemo = (acc: typeof DEMO_ACCOUNTS[0]) => {
-    setEmail(acc.email); setPassword("demo123");
+    setEmail(acc.email);
   };
 
   return (
@@ -112,7 +112,7 @@ export default function Login() {
           {/* Demo accounts */}
           <div className="mt-10">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 text-center">
-              One-Click Demo Accounts
+              Demo accounts
             </p>
             <div className="flex flex-wrap gap-2 justify-center">
               {DEMO_ACCOUNTS.map(acc => {
@@ -125,7 +125,7 @@ export default function Login() {
                 );
               })}
             </div>
-            <p className="text-[10px] text-muted-foreground text-center mt-2">All demo accounts use password: <span className="text-gold font-mono">demo123</span></p>
+            <p className="text-[10px] text-muted-foreground text-center mt-2">Select a role to fill its email, then enter the demo password for this environment.</p>
           </div>
         </motion.div>
       </div>
