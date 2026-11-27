@@ -19,6 +19,15 @@ function hashPassword(password: string): string {
 }
 
 async function seed() {
+  const demoPassword = process.env.SEED_DEMO_PASSWORD?.trim();
+
+  if (!demoPassword) {
+    console.error(
+      "SEED_DEMO_PASSWORD must be set to seed Alset demo accounts. Refusing to continue.",
+    );
+    process.exit(1);
+  }
+
   console.log("Seeding Alset demo data...");
 
   await db.execute(sql`TRUNCATE TABLE alset_rentals RESTART IDENTITY CASCADE`);
@@ -37,7 +46,7 @@ async function seed() {
     { name: "GreenFleet Rentals", type: "rental" },
   ]).returning();
 
-  const password = hashPassword("demo123");
+  const password = hashPassword(demoPassword);
 
   // Users
   const [ownerUser, shopUser, insurerUser, towingUser, rentalUser, adminUser] = await db.insert(alsetUsersTable).values([
@@ -195,13 +204,13 @@ async function seed() {
     },
   ]);
 
-  console.log("\nAlset demo accounts:");
-  console.log("  owner@alset.com     / demo123  (Tesla Owner)");
-  console.log("  shop@alset.com      / demo123  (Repair Shop)");
-  console.log("  insurer@alset.com   / demo123  (Insurance Adjuster)");
-  console.log("  towing@alset.com    / demo123  (Towing Dispatcher)");
-  console.log("  rental@alset.com    / demo123  (Rental Company)");
-  console.log("  admin@alset.com     / demo123  (Admin)");
+  console.log("\nAlset demo accounts (password from SEED_DEMO_PASSWORD):");
+  console.log("  owner@alset.com     (Tesla Owner)");
+  console.log("  shop@alset.com      (Repair Shop)");
+  console.log("  insurer@alset.com   (Insurance Adjuster)");
+  console.log("  towing@alset.com    (Towing Dispatcher)");
+  console.log("  rental@alset.com    (Rental Company)");
+  console.log("  admin@alset.com     (Admin)");
   console.log("\nSeeding complete!");
   process.exit(0);
 }

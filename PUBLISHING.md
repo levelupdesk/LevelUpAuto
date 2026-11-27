@@ -83,7 +83,7 @@ eas submit --platform android
 
 | Workflow | Triggers | What it does |
 |----------|----------|--------------|
-| `ci.yml` | Push to main/develop, PRs | TypeScript check + web builds + security audit |
+| `ci.yml` | Push to main/develop, PRs | TypeScript check + web builds + critical dependency audit + gitleaks secret scan |
 | `eas-build.yml` | Push to main (mobile changes) or manual | EAS build for all platforms; production profile also submits to stores |
 
 ### GitLab CI (`.gitlab-ci.yml`)
